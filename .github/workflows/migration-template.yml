@@ -1,13 +1,22 @@
-name: CI/CD
+name: 'Migration template'
 
 on:
   push:
     branches:
       - develop
+      - staging
+      - main
 
 jobs:
-  cicd:
+  migration-template:
     runs-on: ubuntu-latest
+    environment:
+      name: |-
+        ${{
+          github.ref_name == 'main' && 'production' ||
+          github.ref_name == 'staging' && 'staging' ||
+          'development'
+        }}
 
     steps:
       - name: Checkout
@@ -23,3 +32,7 @@ jobs:
         run: |
           touch .env
           echo SG_API_KEY=${{ secrets.SG_API_KEY }} >> .env
+
+      - name: Run migration
+        run: |
+          node migration.js
